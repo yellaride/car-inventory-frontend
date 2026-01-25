@@ -176,7 +176,7 @@ export default function CarsListPage() {
                       {car.coverImage || (car.media && car.media.length > 0) ? (
                         <>
                           <img
-                            src={car.coverImage || car.media[0]?.url}
+                            src={car.coverImage || car.media?.[0]?.url || ''}
                             alt={`${car.make} ${car.model}`}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                           />
