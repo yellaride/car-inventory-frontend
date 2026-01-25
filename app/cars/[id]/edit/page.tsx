@@ -95,6 +95,7 @@ export default function EditCarPage({ params }: { params: Promise<{ id: string }
         purchasePrice: formData.purchasePrice ? Number(formData.purchasePrice) : undefined,
         purchaseDate: formData.purchaseDate || undefined,
         coverImage: coverImageUrl,
+        condition: formData.condition as any,
       });
     },
     onSuccess: () => {
