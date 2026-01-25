@@ -93,6 +93,7 @@ export default function NewCarPage() {
       // but for now create car without it
       const car = await carsApi.create({
         ...formData,
+        condition: formData.condition as any,
         year: Number(formData.year),
         mileage: formData.mileage ? Number(formData.mileage) : undefined,
         purchasePrice: formData.purchasePrice ? Number(formData.purchasePrice) : undefined,
