@@ -1,0 +1,7 @@
+# Vercel Environment Variables
+# Add these in Vercel Dashboard → Project Settings → Environment Variables
+
+NEXT_PUBLIC_API_URL=https://car-inventory-management-production.up.railway.app/api
+
+# Note: This connects frontend to your Railway backend
+# Make sure to add this in Vercel dashboard before deploying
