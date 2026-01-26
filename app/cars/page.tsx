@@ -3,13 +3,16 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { searchApi, type Car } from '@/lib/api';
+import { authStorage } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search, Car as CarIcon, Image as ImageIcon, FileText, ArrowLeft, Filter } from 'lucide-react';
+import { Plus, Search, Car as CarIcon, Image as ImageIcon, FileText, ArrowLeft, Filter, LogOut } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 const conditionColors: Record<string, string> = {
   EXCELLENT: 'bg-gradient-to-r from-green-500 to-emerald-600',
@@ -21,8 +24,16 @@ const conditionColors: Record<string, string> = {
 };
 
 export default function CarsListPage() {
+  const router = useRouter();
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
+
+  const handleLogout = () => {
+    authStorage.clearAuth();
+    toast({ title: 'Logged out successfully' });
+    router.push('/login');
+  };
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['cars', searchQuery, page],
@@ -54,12 +65,24 @@ export default function CarsListPage() {
                 </div>
               </div>
             </div>
-            <Link href="/cars/new" className="w-full sm:w-auto">
-              <Button className="w-full sm:w-auto gradient-primary shadow-lg hover:shadow-xl transition-all">
-                <Plus className="mr-2 h-4 w-4" />
-                Add New Car
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Link href="/cars/new" className="flex-1 sm:flex-none">
+                <Button className="w-full gradient-primary shadow-lg hover:shadow-xl transition-all">
+                  <Plus className="mr-2 h-4 w-4" />
+                  <span className="hidden sm:inline">Add New Car</span>
+                  <span className="sm:hidden">Add</span>
+                </Button>
+              </Link>
+              <Button 
+                variant="outline" 
+                size="icon"
+                onClick={handleLogout}
+                className="border-2 hover:bg-red-50 hover:border-red-300"
+                title="Logout"
+              >
+                <LogOut className="h-4 w-4 text-red-600" />
               </Button>
-            </Link>
+            </div>
           </div>
 
           {/* Modern Search Bar */}
