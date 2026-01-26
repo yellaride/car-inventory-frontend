@@ -92,12 +92,14 @@ export default function UploadMediaPage({ params }: { params: Promise<{ id: stri
       });
 
       try {
-        await mediaApi.upload(
+        const result = await mediaApi.upload(
           fileData.file,
           resolvedParams.id,
           fileData.mediaType,
           fileData.category
         );
+
+        console.log('Upload successful:', result);
 
         // Update status to success
         setFiles(prev => {
@@ -106,7 +108,10 @@ export default function UploadMediaPage({ params }: { params: Promise<{ id: stri
           updated[i].progress = 100;
           return updated;
         });
-      } catch (error) {
+      } catch (error: any) {
+        console.error('Upload error:', error);
+        console.error('Error response:', error.response?.data);
+        
         // Update status to error
         setFiles(prev => {
           const updated = [...prev];
@@ -119,10 +124,14 @@ export default function UploadMediaPage({ params }: { params: Promise<{ id: stri
     setIsUploading(false);
     
     const successCount = files.filter(f => f.status === 'success').length;
+    const errorCount = files.filter(f => f.status === 'error').length;
+    
+    console.log('Upload summary:', { total: files.length, success: successCount, errors: errorCount });
+    
     if (successCount > 0) {
       toast({ 
         title: 'Upload Complete!', 
-        description: `${successCount} file(s) uploaded successfully` 
+        description: `${successCount} file(s) uploaded successfully${errorCount > 0 ? `, ${errorCount} failed` : ''}` 
       });
       // Invalidate both car detail and listing cache
       queryClient.invalidateQueries({ queryKey: ['car', resolvedParams.id] });
@@ -135,7 +144,7 @@ export default function UploadMediaPage({ params }: { params: Promise<{ id: stri
     } else {
       toast({ 
         title: 'Upload Failed', 
-        description: 'No files were uploaded successfully',
+        description: 'No files were uploaded successfully. Check console for errors.',
         variant: 'destructive' 
       });
     }
