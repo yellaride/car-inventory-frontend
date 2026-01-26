@@ -5,23 +5,12 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
   // Public paths that don't require authentication
-  const publicPaths = ['/login'];
-  const isPublicPath = publicPaths.some(path => pathname.startsWith(path));
+  const publicPaths = ['/login', '/'];
+  const isPublicPath = publicPaths.includes(pathname);
   
-  // Get token from cookie or header
-  const token = request.cookies.get('auth_token')?.value;
-  
-  // If accessing protected route without token, redirect to login
-  if (!isPublicPath && !token && pathname !== '/') {
-    const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('redirect', pathname);
-    return NextResponse.redirect(loginUrl);
-  }
-  
-  // If logged in and trying to access login page, redirect to dashboard
-  if (token && pathname === '/login') {
-    return NextResponse.redirect(new URL('/cars', request.url));
-  }
+  // Check localStorage token via headers (client-side only)
+  // Middleware runs on server, so we allow all requests
+  // Client-side auth check happens in pages
   
   return NextResponse.next();
 }

@@ -30,18 +30,20 @@ export default function LoginPage() {
 
       toast({ 
         title: 'Login Successful!', 
-        description: `Welcome back, ${response.user.email}` 
+        description: `Welcome back!` 
       });
 
-      // Redirect to cars page
-      router.push('/cars');
+      // Force redirect after short delay
+      setTimeout(() => {
+        window.location.href = '/cars';
+      }, 500);
     } catch (error: any) {
+      console.error('Login error:', error);
       toast({
         title: 'Login Failed',
         description: error.response?.data?.message || 'Invalid email or password',
         variant: 'destructive',
       });
-    } finally {
       setIsLoading(false);
     }
   };
