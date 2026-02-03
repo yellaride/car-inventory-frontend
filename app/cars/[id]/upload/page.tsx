@@ -10,8 +10,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Upload, X, Image as ImageIcon, Video, Loader2, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Upload, X, Image as ImageIcon, Video, Loader2, CheckCircle2, Camera } from 'lucide-react';
 import { formatBytes } from '@/lib/utils';
+import { CameraCapture } from '@/components/CameraCapture';
 
 interface UploadFile {
   file: File;
@@ -29,6 +30,7 @@ export default function UploadMediaPage({ params }: { params: Promise<{ id: stri
   const queryClient = useQueryClient();
   const [files, setFiles] = useState<UploadFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [cameraOpen, setCameraOpen] = useState(false);
 
   // Fetch car details
   const { data: car } = useQuery({
@@ -55,6 +57,20 @@ export default function UploadMediaPage({ params }: { params: Promise<{ id: stri
       setFiles(prev => [...prev, ...newFiles]);
     },
   });
+
+  const handleCameraCapture = (file: File) => {
+    const preview = URL.createObjectURL(file);
+    const mediaType = file.type.startsWith('image') ? 'IMAGE' : 'VIDEO';
+    setFiles(prev => [...prev, {
+      file,
+      preview,
+      progress: 0,
+      status: 'pending',
+      mediaType,
+      category: 'general',
+    }]);
+    setCameraOpen(false);
+  };
 
   // Remove file
   const removeFile = (index: number) => {
@@ -179,7 +195,18 @@ export default function UploadMediaPage({ params }: { params: Promise<{ id: stri
             <CardTitle>Upload Photos & Videos</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Dropzone */}
+            {/* Camera + Dropzone */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1 gap-2 h-14 border-2 border-dashed border-purple-300 hover:border-purple-500 hover:bg-purple-50"
+                onClick={() => setCameraOpen(true)}
+              >
+                <Camera className="h-5 w-5" />
+                Open camera (photo / video)
+              </Button>
+            </div>
             <div
               {...getRootProps()}
               className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors ${
@@ -205,6 +232,13 @@ export default function UploadMediaPage({ params }: { params: Promise<{ id: stri
                 </>
               )}
             </div>
+
+            <CameraCapture
+              open={cameraOpen}
+              onOpenChange={setCameraOpen}
+              onCapture={handleCameraCapture}
+              mode="both"
+            />
 
             {/* File List */}
             {files.length > 0 && (

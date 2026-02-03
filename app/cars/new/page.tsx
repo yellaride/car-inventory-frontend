@@ -10,7 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Search, Loader2, Upload, X, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Search, Loader2, Upload, X, CheckCircle2, Camera } from 'lucide-react';
+import { CameraCapture } from '@/components/CameraCapture';
 
 const conditions = ['EXCELLENT', 'GOOD', 'FAIR', 'POOR', 'SALVAGE', 'JUNK'];
 
@@ -35,6 +36,7 @@ export default function NewCarPage() {
   });
   const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
   const [coverImagePreview, setCoverImagePreview] = useState<string>('');
+  const [cameraOpen, setCameraOpen] = useState(false);
 
   const handleCoverImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -46,6 +48,14 @@ export default function NewCarPage() {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleCameraCover = (file: File) => {
+    setCoverImageFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setCoverImagePreview(reader.result as string);
+    reader.readAsDataURL(file);
+    setCameraOpen(false);
   };
 
   const decodeVin = async () => {
@@ -226,26 +236,45 @@ export default function NewCarPage() {
                       </Button>
                     </div>
                   ) : (
-                    <label className="flex flex-col items-center justify-center w-full h-48 sm:h-56 border-2 border-dashed border-purple-300 rounded-xl cursor-pointer hover:bg-purple-50 transition-all group">
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <Upload className="h-10 w-10 sm:h-12 sm:w-12 text-purple-400 mb-3 group-hover:scale-110 transition-transform" />
-                        <p className="text-sm sm:text-base text-gray-600 font-medium">
-                          Click to upload cover image
-                        </p>
-                        <p className="text-xs text-gray-500 mt-2">
-                          PNG, JPG, WEBP (Max 10MB)
-                        </p>
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="flex-1 gap-2 border-2 border-purple-200"
+                          onClick={() => setCameraOpen(true)}
+                        >
+                          <Camera className="h-4 w-4" />
+                          Take photo
+                        </Button>
                       </div>
-                      <input
-                        id="coverImage"
-                        type="file"
-                        className="hidden"
-                        accept="image/*"
-                        onChange={handleCoverImageChange}
-                      />
-                    </label>
+                      <label className="flex flex-col items-center justify-center w-full h-40 sm:h-48 border-2 border-dashed border-purple-300 rounded-xl cursor-pointer hover:bg-purple-50 transition-all group">
+                        <div className="flex flex-col items-center justify-center pt-4 pb-5">
+                          <Upload className="h-8 w-8 sm:h-10 sm:w-10 text-purple-400 mb-2 group-hover:scale-110 transition-transform" />
+                          <p className="text-sm text-gray-600 font-medium">
+                            Or click to upload from device
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            PNG, JPG, WEBP (Max 10MB)
+                          </p>
+                        </div>
+                        <input
+                          id="coverImage"
+                          type="file"
+                          className="hidden"
+                          accept="image/*"
+                          onChange={handleCoverImageChange}
+                        />
+                      </label>
+                    </div>
                   )}
                 </div>
+                <CameraCapture
+                  open={cameraOpen}
+                  onOpenChange={setCameraOpen}
+                  onCapture={handleCameraCover}
+                  mode="photo"
+                />
               </div>
 
               {/* Form Fields - 2 Column Grid */}

@@ -10,7 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Loader2, Upload, X } from 'lucide-react';
+import { ArrowLeft, Loader2, Upload, X, Camera } from 'lucide-react';
+import { CameraCapture } from '@/components/CameraCapture';
 
 const conditions = ['EXCELLENT', 'GOOD', 'FAIR', 'POOR', 'SALVAGE', 'JUNK'];
 
@@ -35,6 +36,7 @@ export default function EditCarPage({ params }: { params: Promise<{ id: string }
   });
   const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
   const [coverImagePreview, setCoverImagePreview] = useState<string>('');
+  const [cameraOpen, setCameraOpen] = useState(false);
 
   // Fetch car details
   const { data: car, isLoading } = useQuery({
@@ -75,6 +77,14 @@ export default function EditCarPage({ params }: { params: Promise<{ id: string }
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleCameraCover = (file: File) => {
+    setCoverImageFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setCoverImagePreview(reader.result as string);
+    reader.readAsDataURL(file);
+    setCameraOpen(false);
   };
 
   // Update car mutation
@@ -255,26 +265,43 @@ export default function EditCarPage({ params }: { params: Promise<{ id: string }
                       </Button>
                     </div>
                   ) : (
-                    <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50">
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <Upload className="h-10 w-10 text-gray-400 mb-2" />
-                        <p className="text-sm text-gray-600">
-                          Click to upload cover image
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          PNG, JPG, WEBP (Max 10MB)
-                        </p>
-                      </div>
-                      <input
-                        id="coverImage"
-                        type="file"
-                        className="hidden"
-                        accept="image/*"
-                        onChange={handleCoverImageChange}
-                      />
-                    </label>
+                    <div className="space-y-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full gap-2"
+                        onClick={() => setCameraOpen(true)}
+                      >
+                        <Camera className="h-4 w-4" />
+                        Take photo from camera
+                      </Button>
+                      <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50">
+                        <div className="flex flex-col items-center justify-center pt-4 pb-5">
+                          <Upload className="h-8 w-8 text-gray-400 mb-2" />
+                          <p className="text-sm text-gray-600">
+                            Or click to upload from device
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            PNG, JPG, WEBP (Max 10MB)
+                          </p>
+                        </div>
+                        <input
+                          id="coverImage"
+                          type="file"
+                          className="hidden"
+                          accept="image/*"
+                          onChange={handleCoverImageChange}
+                        />
+                      </label>
+                    </div>
                   )}
                 </div>
+                <CameraCapture
+                  open={cameraOpen}
+                  onOpenChange={setCameraOpen}
+                  onCapture={handleCameraCover}
+                  mode="photo"
+                />
                 <p className="text-xs text-gray-500 mt-1">
                   This image will appear on the listing page
                 </p>
